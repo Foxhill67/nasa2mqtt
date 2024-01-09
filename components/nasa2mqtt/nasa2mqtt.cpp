@@ -28,18 +28,6 @@ namespace esphome
         data_processing_init = false;
       }
 
-//?      if (data_processing_paused)
-//?      {
-//?        ESP_LOGCONFIG(TAG, "Data Processing is paused !!!!");
-//?      }
-
-//?      std::string devices = "";
-//?      for (const auto &[address, device] : devices_)
-//?      {
-//?        devices += devices.length() > 0 ? ", " + address : address;
-//?      }
-//?      ESP_LOGCONFIG(TAG, "Configured devices: %s", devices.c_str());
-
       std::string knownIndoor = "";
       std::string knownOutdoor = "";
       std::string knownOther = "";
@@ -65,11 +53,6 @@ namespace esphome
         ESP_LOGCONFIG(TAG, "  Other:   %s", knownOther.c_str());
     }
 
-//?    void NASA2MQTT::send_bus_message(std::vector<uint8_t> &data)
-//?    {
-//?// commented out to avoid sending messages for now !!      out_.insert(out_.end(), data.begin(), data.end());
-//?    }
-
     void NASA2MQTT::dump_config()
     {
       ESP_LOGCONFIG(TAG, "NASA2MQTT:");
@@ -88,19 +71,6 @@ namespace esphome
         data_.clear();
         receiving_ = false;
       }
-
-//?      if (!available())
-//?      {
-//?        if (out_.size() > 0)
-//?        {
-//?          ESP_LOGW(TAG, "write %s", bytes_to_hex(out_).c_str());
-//?          this->write_array(out_);
-//?          this->flush();
-//?          out_.clear();
-//?        }
-//?
-//?        return; // nothing in uart-input-buffer, end here
-//?      }
 
       last_transmission_ = now;
       while (available())
@@ -147,7 +117,5 @@ namespace esphome
         }
       }
     }
-
-//?   float NASA2MQTT::get_setup_priority() const { return setup_priority::DATA; }
   } // namespace nasa2mqtt
 } // namespace esphome

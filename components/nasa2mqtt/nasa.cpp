@@ -12,13 +12,6 @@ namespace esphome
 {
     namespace nasa2mqtt
     {
-//?        int variable_to_signed(int value)
-//?        {
-//?            if (value < 65535 /*uint16 max*/)
-//?                return value;
-//?            return value - (int)65535 /*uint16 max*/ - 1.0;
-//?        }
-
         uint16_t crc16(std::vector<uint8_t> &data, int startIndex, int length)
         {
             uint16_t crc = 0;
@@ -39,7 +32,7 @@ namespace esphome
         Address Address::get_my_address()
         {
             Address address;
-            address.klass = AddressClass::JIGTester;
+            address.class = AddressClass::JIGTester;
             address.channel = 0xFF;
             address.address = 0;
             return address;
@@ -49,7 +42,7 @@ namespace esphome
         {
             Address address;
             char *pEnd;
-            address.klass = (AddressClass)strtol(str.c_str(), &pEnd, 16);
+            address.class = (AddressClass)strtol(str.c_str(), &pEnd, 16);
             pEnd++; // .
             address.channel = strtol(pEnd, &pEnd, 16);
             pEnd++; // .
@@ -59,22 +52,15 @@ namespace esphome
 
         void Address::decode(std::vector<uint8_t> &data, unsigned int index)
         {
-            klass = (AddressClass)data[index];
+            class = (AddressClass)data[index];
             channel = data[index + 1];
             address = data[index + 2];
         }
 
-//?        void Address::encode(std::vector<uint8_t> &data)
-//?        {
-//?            data.push_back((uint8_t)klass);
-//?            data.push_back(channel);
-//?            data.push_back(address);
-//?        }
-
         std::string Address::to_string()
         {
             char str[9];
-            sprintf(str, "%02x.%02x.%02x", (int)klass, channel, address);
+            sprintf(str, "%02x.%02x.%02x", (int)class, channel, address);
             return str;
         }
 
@@ -87,13 +73,6 @@ namespace esphome
             dataType = (DataType)((int)data[index + 1] & 15);
             packetNumber = data[index + 2];
         }
-
-//?        void Command::encode(std::vector<uint8_t> &data)
-//?        {
-//?            data.push_back((uint8_t)((((int)packetInformation ? 1 : 0) << 7) + ((int)protocolVersion << 5) + ((int)retryCount << 3)));
-//?            data.push_back((uint8_t)(((int)packetType << 4) + (int)dataType));
-//?            data.push_back(packetNumber);
-//?        }
 
         std::string Command::to_string()
         {
@@ -149,39 +128,6 @@ namespace esphome
             return set;
         };
 
-//?        void MessageSet::encode(std::vector<uint8_t> &data)
-//?        {
-//?            uint16_t messageNumber = (uint16_t)this->messageNumber;
-//?            data.push_back((uint8_t)((messageNumber >> 8) & 0xff));
-//?            data.push_back((uint8_t)(messageNumber & 0xff));
-//?
-//?            switch (type)
-//?            {
-//?            case Enum:
-//?                data.push_back((uint8_t)value);
-//?                break;
-//?            case Variable:
-//?                data.push_back((uint8_t)(value >> 8) & 0xff);
-//?                data.push_back((uint8_t)(value & 0xff));
-//?                break;
-//?            case LongVariable:
-//?                data.push_back((uint8_t)(value & 0x000000ff));
-//?                data.push_back((uint8_t)((value & 0x0000ff00) >> 8));
-//?                data.push_back((uint8_t)((value & 0x00ff0000) >> 16));
-//?                data.push_back((uint8_t)((value & 0xff000000) >> 24));
-//?                break;
-//?
-//?            case Structure:
-//?                for (int i = 0; i < structure.size; i++)
-//?                {
-//?                    data.push_back(structure.data[i]);
-//?                }
-//?                break;
-//?            default:
-//?                ESP_LOGE(TAG, "Unkown type");
-//?            }
-//?        }
-
         std::string MessageSet::to_string()
         {
             switch (type)
@@ -200,27 +146,6 @@ namespace esphome
         }
 
         static int _packetCounter = 0;
-
-//?        Packet Packet::create(Address da, DataType dataType, MessageNumber messageNumber, int value)
-//?        {
-//?            Packet packet = createa_partial(da, dataType);
-//?            MessageSet message(messageNumber);
-//?            message.value = value;
-//?            packet.messages.push_back(message);
-//?            return packet;
-//?        }
-
-//?        Packet Packet::createa_partial(Address da, DataType dataType)
-//?        {
-//?            Packet packet;
-//?            packet.sa = Address::get_my_address();
-//?            packet.da = da;
-//?            packet.commad.packetInformation = true;
-//?            packet.commad.packetType = PacketType::Normal;
-//?            packet.commad.dataType = dataType;
-//?            packet.commad.packetNumber = _packetCounter++;
-//?            return packet;
-//?        }
 
         bool Packet::decode(std::vector<uint8_t> &data)
         {
@@ -266,8 +191,8 @@ namespace esphome
             da.decode(data, cursor);
             cursor += da.size;
 
-            commad.decode(data, cursor);
-            cursor += commad.size;
+            command.decode(data, cursor);
+            cursor += command.size;
 
             int capacity = (int)data[cursor];
             cursor++;
@@ -283,46 +208,11 @@ namespace esphome
             return true;
         };
 
-//?        std::vector<uint8_t> Packet::encode()
-//?        {
-//?            std::vector<uint8_t> data;
-//?
-//?            data.push_back(0x32);
-//?            data.push_back(0); // size
-//?            data.push_back(0); // size
-//?            sa.encode(data);
-//?            da.encode(data);
-//?            commad.encode(data);
-//?
-//?            data.push_back((uint8_t)messages.size());
-//?            for (int i = 0; i < messages.size(); i++)
-//?            {
-//?                messages[i].encode(data);
-//?            }
-//?
-//?            int endPosition = data.size() + 1;
-//?            data[1] = (uint8_t)(endPosition >> 8);
-//?            data[2] = (uint8_t)(endPosition & (int)0xFF);
-//?
-//?            uint16_t checksum = crc16(data, 3, endPosition - 4);
-//?            data.push_back((uint8_t)((unsigned int)checksum >> 8));
-//?            data.push_back((uint8_t)((unsigned int)checksum & (unsigned int)0xFF));
-//?
-//?            data.push_back(0x34);
-//?
-//?            /*
-//?            for (int i = 0; i < 100; ++i)
-//?                data.insert(data.begin(), 0x55); // Preamble
-//?            */
-//?
-//?            return data;
-//?        };
-
         std::string Packet::to_string()
         {
             std::string str;
             str += "#Packet Sa:" + sa.to_string() + " Da:" + da.to_string() + "\n";
-            str += "Command: " + commad.to_string() + "\n";
+            str += "Command: " + command.to_string() + "\n";
 
             for (int i = 0; i < messages.size(); i++)
             {
@@ -334,99 +224,7 @@ namespace esphome
             return str;
         }
 
-//?        std::vector<uint8_t> NasaProtocol::get_power_message(const std::string &address, bool value)
-//?        {
-//?            auto packet = Packet::create(Address::parse(address), DataType::Request, MessageNumber::ENUM_IN_OPERATION_POWER_4000, value ? 1 : 0);
-//?            return packet.encode();
-//?        }
-//?
-//?        std::vector<uint8_t> NasaProtocol::get_target_temp_message(const std::string &address, float value)
-//?        {
-//?            auto packet = Packet::create(Address::parse(address), DataType::Request, MessageNumber::VAR_IN_TEMP_TARGET_F_4201, value * 10.0);
-//?            return packet.encode();
-//?        }
-//?
-//?        std::vector<uint8_t> NasaProtocol::get_mode_message(const std::string &address, Mode value)
-//?        {
-//?            auto packet = Packet::create(Address::parse(address), DataType::Request, MessageNumber::ENUM_IN_OPERATION_MODE_4001, (int)value);
-//?            return packet.encode();
-//?        }
-
-//?        int fanmode_to_nasa_fanmode(FanMode mode)
-//?        {
-//?            // This stuff did not exists in XML only in Remcode.dll
-//?            switch (mode)
-//?            {
-//?            case FanMode::Low:
-//?                return 1;
-//?            case FanMode::Mid:
-//?                return 2;
-//?            case FanMode::Hight:
-//?                return 3;
-//?            case FanMode::Auto:
-//?            default:
-//?                return 0;
-//?            }
-//?        }
-
-//?        std::vector<uint8_t> NasaProtocol::get_fanmode_message(const std::string &address, FanMode value)
-//?        {
-//?            auto packet = Packet::create(Address::parse(address), DataType::Request, MessageNumber::ENUM_IN_FAN_MODE_4006, fanmode_to_nasa_fanmode(value));
-//?            ESP_LOGW(TAG, "test %s", packet.to_string().c_str());
-//?            return packet.encode();
-//?        }
-//?
         Packet packet_;
-
-//?        Mode operation_mode_to_mode(int value)
-//?        {
-//?            switch (value)
-//?            {
-//?            case 0:
-//?                return Mode::Auto;
-//?            case 1:
-//?                return Mode::Cool;
-//?            case 2:
-//?                return Mode::Dry;
-//?            case 3:
-//?                return Mode::Fan;
-//?            case 4:
-//?                return Mode::Heat;
-//?                // case 21:  Cool Storage
-//?                // case 24: Hot Water
-//?            default:
-//?                return Mode::Unknown;
-//?            }
-//?        }
-
-//?        FanMode fan_mode_real_to_fanmode(int value)
-//?        {
-//?            switch (value)
-//?            {
-//?            case 1: // Low
-//?                return FanMode::Low;
-//?            case 2: // Mid
-//?                return FanMode::Mid;
-//?            case 3: // Hight
-//?            case 4: // Turbo
-//?                return FanMode::Hight;
-//?            case 10: // AutoLow
-//?            case 11: // AutoMid
-//?            case 12: // AutoHigh
-//?            case 13: // UL    - Windfree?
-//?            case 14: // LL    - Auto?
-//?            case 15: // HH
-//?                return FanMode::Auto;
-//?            case 254:
-//?                return FanMode::Off;
-//?            case 16: // Speed
-//?            case 17: // NaturalLow
-//?            case 18: // NaturalMid
-//?            case 19: // NaturalHigh
-//?            default:
-//?                return FanMode::Unknown;
-//?            }
-//?        }
 
         void process_nasa_message(std::vector<uint8_t> data, MessageTarget *target)
         {
@@ -438,17 +236,17 @@ namespace esphome
                 ESP_LOGW(TAG, "MSG: %s", packet_.to_string().c_str());
             }
 
-            if (packet_.commad.dataType == DataType::Request)
+            if (packet_.command.dataType == DataType::Request)
             {
                 ESP_LOGW(TAG, "Request %s", packet_.to_string().c_str());
                 return;
             }
-            if (packet_.commad.dataType == DataType::Write)
+            if (packet_.command.dataType == DataType::Write)
             {
                 ESP_LOGW(TAG, "Write %s", packet_.to_string().c_str());
                 return;
             }
-            if (packet_.commad.dataType == DataType::Response)
+            if (packet_.command.dataType == DataType::Response)
             {
                 ESP_LOGW(TAG, "Response %s", packet_.to_string().c_str());
             }

@@ -19,11 +19,6 @@ namespace esphome
                 ESP_LOGW(TAG, "RAW: %s", bytes_to_hex(data).c_str());
             }
 
-//?            if (data.size() == 14)
-//?            {
-//?                process_non_nasa_message(data, target);
-//?                return;
-//?            }
             if (data.size() >= 16 && data.size() < 1500)
             {
                 process_nasa_message(data, target);
@@ -38,15 +33,5 @@ namespace esphome
             return address.size() != 2;
         }
 
-//?        Protocol *nasaProtocol = new NasaProtocol();
-//?        Protocol *nonNasaProtocol = new NonNasaProtocol();
-
-//?        Protocol *get_protocol(const std::string &address)
-//?        {
-//?            if (!is_nasa_address(address))
-//?                return nonNasaProtocol;
-
-//?            return nasaProtocol;
-//?        }
     } // namespace nasa2mqtt
 } // namespace esphome

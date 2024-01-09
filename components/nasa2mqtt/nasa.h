@@ -346,7 +346,7 @@ namespace esphome
 
         struct Address
         {
-            AddressClass klass;
+            AddressClass class;
             uint8_t channel;
             uint8_t address;
             uint8_t size = 3;
@@ -355,7 +355,6 @@ namespace esphome
             static Address get_my_address();
 
             void decode(std::vector<uint8_t> &data, unsigned int index);
-//?            void encode(std::vector<uint8_t> &data);
             std::string to_string();
         };
 
@@ -371,7 +370,6 @@ namespace esphome
             uint8_t size = 3;
 
             void decode(std::vector<uint8_t> &data, unsigned int index);
-//?            void encode(std::vector<uint8_t> &data);
             std::string to_string();
         };
 
@@ -402,7 +400,6 @@ namespace esphome
 
             static MessageSet decode(std::vector<uint8_t> &data, unsigned int index, int capacity);
 
-//?            void encode(std::vector<uint8_t> &data);
             std::string to_string();
         };
 
@@ -410,29 +407,14 @@ namespace esphome
         {
             Address sa;
             Address da;
-            Command commad;
+            Command command;
             std::vector<MessageSet> messages;
 
-//?            static Packet create(Address da, DataType dataType, MessageNumber messageNumber, int value);
-//?            static Packet createa_partial(Address da, DataType dataType);
-
             bool decode(std::vector<uint8_t> &data);
-//?            std::vector<uint8_t> encode();
             std::string to_string();
         };
 
         void process_nasa_message(std::vector<uint8_t> data, MessageTarget *target);
-
-//?        class NasaProtocol : public Protocol
-//?        {
-//?        public:
-//?            NasaProtocol() = default;
-
-//?            std::vector<uint8_t> get_power_message(const std::string &address, bool value) override;
-//?            std::vector<uint8_t> get_target_temp_message(const std::string &address, float value) override;
-//?            std::vector<uint8_t> get_mode_message(const std::string &address, Mode value) override;
-//?            std::vector<uint8_t> get_fanmode_message(const std::string &address, FanMode value) override;
-//?        };
 
     } // namespace nasa2mqtt
 } // namespace esphome
