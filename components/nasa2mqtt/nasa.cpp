@@ -32,7 +32,7 @@ namespace esphome
         Address Address::get_my_address()
         {
             Address address;
-            address.class = AddressClass::JIGTester;
+            address.aclass = AddressClass::JIGTester;
             address.channel = 0xFF;
             address.address = 0;
             return address;
@@ -42,7 +42,7 @@ namespace esphome
         {
             Address address;
             char *pEnd;
-            address.class = (AddressClass)strtol(str.c_str(), &pEnd, 16);
+            address.aclass = (AddressClass)strtol(str.c_str(), &pEnd, 16);
             pEnd++; // .
             address.channel = strtol(pEnd, &pEnd, 16);
             pEnd++; // .
@@ -52,7 +52,7 @@ namespace esphome
 
         void Address::decode(std::vector<uint8_t> &data, unsigned int index)
         {
-            class = (AddressClass)data[index];
+            aclass = (AddressClass)data[index];
             channel = data[index + 1];
             address = data[index + 2];
         }
@@ -60,7 +60,7 @@ namespace esphome
         std::string Address::to_string()
         {
             char str[9];
-            sprintf(str, "%02x.%02x.%02x", (int)class, channel, address);
+            sprintf(str, "%02x.%02x.%02x", (int)aclass, channel, address);
             return str;
         }
 
@@ -191,8 +191,8 @@ namespace esphome
             da.decode(data, cursor);
             cursor += da.size;
 
-            command.decode(data, cursor);
-            cursor += command.size;
+            pcommand.decode(data, cursor);
+            cursor += pcommand.size;
 
             int capacity = (int)data[cursor];
             cursor++;
@@ -212,7 +212,7 @@ namespace esphome
         {
             std::string str;
             str += "#Packet Sa:" + sa.to_string() + " Da:" + da.to_string() + "\n";
-            str += "Command: " + command.to_string() + "\n";
+            str += "Command: " + pcommand.to_string() + "\n";
 
             for (int i = 0; i < messages.size(); i++)
             {
@@ -236,17 +236,17 @@ namespace esphome
                 ESP_LOGW(TAG, "MSG: %s", packet_.to_string().c_str());
             }
 
-            if (packet_.command.dataType == DataType::Request)
+            if (packet_.pcommand.dataType == DataType::Request)
             {
                 ESP_LOGW(TAG, "Request %s", packet_.to_string().c_str());
                 return;
             }
-            if (packet_.command.dataType == DataType::Write)
+            if (packet_.pcommand.dataType == DataType::Write)
             {
                 ESP_LOGW(TAG, "Write %s", packet_.to_string().c_str());
                 return;
             }
-            if (packet_.command.dataType == DataType::Response)
+            if (packet_.pcommand.dataType == DataType::Response)
             {
                 ESP_LOGW(TAG, "Response %s", packet_.to_string().c_str());
             }

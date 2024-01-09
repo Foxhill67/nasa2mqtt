@@ -346,7 +346,7 @@ namespace esphome
 
         struct Address
         {
-            AddressClass class;
+            AddressClass aclass;
             uint8_t channel;
             uint8_t address;
             uint8_t size = 3;
@@ -407,7 +407,7 @@ namespace esphome
         {
             Address sa;
             Address da;
-            Command command;
+            Command pcommand;
             std::vector<MessageSet> messages;
 
             bool decode(std::vector<uint8_t> &data);
