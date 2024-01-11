@@ -262,20 +262,20 @@ namespace esphome
                     {
                         if (message.type == MessageSetType::Enum)
                         {
-                            mqtt_publish("samsung_ac/nasa/enum/" + long_to_hex((uint16_t)message.messageNumber), std::to_string(message.value));
+                            mqtt_publish("samsung_ehs_debug/nasa/enum/" + long_to_hex((uint16_t)message.messageNumber), std::to_string(message.value));
                         }
                         else if (message.type == MessageSetType::Variable)
                         {
-                            mqtt_publish("samsung_ac/nasa/var/" + long_to_hex((uint16_t)message.messageNumber), std::to_string(message.value));
+                            mqtt_publish("samsung_ehs_debug/nasa/var/" + long_to_hex((uint16_t)message.messageNumber), std::to_string(message.value));
                         }
                         else if (message.type == MessageSetType::LongVariable)
                         {
-                            mqtt_publish("samsung_ac/nasa/var_long/" + long_to_hex((uint16_t)message.messageNumber), std::to_string(message.value));
+                            mqtt_publish("samsung_ehs_debug/nasa/var_long/" + long_to_hex((uint16_t)message.messageNumber), std::to_string(message.value));
                         }
                     }
                 }
 
-				// send relevant EHS messages via MQTT to HomeAssistant
+				// send relevant EHS messages via MQTT
                	switch (message.messageNumber)
 				{		
 					case MessageNumber::VAR_AD_ERROR_CODE1_202:
@@ -553,7 +553,7 @@ namespace esphome
 					{
                         if (mqtt_connected())
                         {
-						    mqtt_publish("homeassistant/samsung_ehs/" + long_to_hex((uint16_t)message.messageNumber) + "/state", std::to_string(message.value));
+						    mqtt_publish("samsung_ehs/" + long_to_hex((uint16_t)message.messageNumber) + "/state", std::to_string(message.value));
 						    break;
                         }
 					}	
