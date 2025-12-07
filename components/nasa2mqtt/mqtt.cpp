@@ -31,7 +31,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
         ESP_LOGE("NASA2MQTT", "MQTT_EVENT_ERROR, error_code=%d", event->error_handle->error_type);
         // Print the underlying TCP/TLS errors for deeper debugging
         if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT) {
-            ESP_LOGE("NASA2MQTT", "TCP_TRANSPORT Error: %s", esp_err_to_name(event->error_handle->esp_error));
+            ESP_LOGE("NASA2MQTT", "TCP_TRANSPORT Error: %s", esp_err_to_name(event->error_handle->sock_errno));
         }
         break;
     default:
