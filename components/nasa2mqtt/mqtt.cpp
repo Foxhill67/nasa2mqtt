@@ -84,9 +84,10 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
                 // --- CORRECTED ACCESS FOR MODERN ESP-IDF (v5.0+) ---
 
                 // 1. Broker Host and Port: Set directly under the 'broker' structure.
-                mqtt_cfg.broker.address.hostname = host.c_str(); 
-                mqtt_cfg.broker.address.port = port;      
-                mqtt_cfg.broker.address.transport = MQTT_TRANSPORT_OVER_TCP;
+               //mqtt_cfg.broker.address.hostname = host.c_str(); 
+                //mqtt_cfg.broker.address.port = port;      
+                //mqtt_cfg.broker.address.transport = MQTT_TRANSPORT_OVER_TCP;
+                mqtt_cfg.broker.address.uri = "mqtt://192.168.20.123:1883"
 
                 if (username.length() > 0)
                 {
