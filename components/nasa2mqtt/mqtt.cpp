@@ -9,12 +9,16 @@ AsyncMqttClient *mqtt_client{nullptr};
 #include <mqtt_client.h>
 esp_mqtt_client_handle_t mqtt_client{nullptr};
 
-static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
-{
+static esp_err_t mqtt_event_handler(void *handler_args,
+                                    esp_event_base_t base,
+                                    int32_t event_id,
+                                    void *event_data) {
+    esp_mqtt_event_handle_t event = event_data;
+
     // Make sure to use the full namespace path to access is_mqtt_connected
     using namespace esphome::nasa2mqtt;
     
-    switch (event->event_id)
+    switch (event_id)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI("NASA2MQTT", "MQTT_EVENT_CONNECTED");
@@ -31,7 +35,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
         ESP_LOGE("NASA2MQTT", "MQTT_EVENT_ERROR, error_code=%d", event->error_handle->error_type);
         break;
     default:
-        ESP_LOGI("NASA2MQTT", "Unknown event id: %d", event->event_id);
+        ESP_LOGI("NASA2MQTT", "Unknown event id: %d", event_id);
         break;
     }
     return ESP_OK;
