@@ -8,7 +8,6 @@ AsyncMqttClient *mqtt_client{nullptr};
 #ifdef USE_ESP32
 #include <mqtt_client.h>
 esp_mqtt_client_handle_t mqtt_client{nullptr};
-volatile bool is_mqtt_connected = false; // Define the status variable
 
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
 {
@@ -19,11 +18,11 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI("NASA2MQTT", "MQTT_EVENT_CONNECTED");
-        is_mqtt_connected = true;
+        esphome::nasa2mqtt::is_mqtt_connected = true;
         break;
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGW("NASA2MQTT", "MQTT_EVENT_DISCONNECTED");
-        is_mqtt_connected = false;
+        esphome::nasa2mqtt::is_mqtt_connected = false;
         break;
     case MQTT_EVENT_PUBLISHED:
         ESP_LOGV("NASA2MQTT", "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
@@ -31,8 +30,8 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     case MQTT_EVENT_ERROR:
         ESP_LOGE("NASA2MQTT", "MQTT_EVENT_ERROR, error_code=%d", event->error_handle->esp_error_get_code());
         // Print the underlying TCP/TLS errors for deeper debugging
-        if (event->error_handle->error_type == ESP_MQTT_ERROR_TYPE_TCP_TRANSPORT) {
-            ESP_LOGE("NASA2MQTT", "TCP_TRANSPORT Error: %s", esp_err_to_name(event->error_handle->connect_errno));
+        if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT) {
+            ESP_LOGE("NASA2MQTT", "TCP_TRANSPORT Error: %s", esp_err_to_name(event->error_handle->esp_errno));
         }
         break;
     default:
@@ -46,6 +45,10 @@ namespace esphome
 {
     namespace nasa2mqtt
     {
+#ifdef USE_ESP32
+        // Define the variable here, so the 'extern' in the header refers to this definition
+        volatile bool is_mqtt_connected = false; 
+#endif
         bool mqtt_connected()
         {
 #ifdef USE_ESP8266
@@ -97,7 +100,7 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
                 }
                 
                 mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-                esp_mqtt_client_register_event(mqtt_client, (esp_mqtt_event_id_t)ESP_EVENT_ANY_ID, mqtt_event_handler, mqtt_client);
+                esp_mqtt_client_register_event(mqtt_client, (esp_mqtt_event_id_t)ESP_EVENT_ANY_ID, (esp_event_handler_t)mqtt_event_handler, mqtt_client);                
                 esp_mqtt_client_start(mqtt_client);
             }
 #endif
