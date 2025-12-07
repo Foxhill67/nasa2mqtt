@@ -31,7 +31,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
         ESP_LOGE("NASA2MQTT", "MQTT_EVENT_ERROR, error_code=%d", event->error_handle->error_type);
         break;
     default:
-        ESP_LOGI("NASA2MQTT", "Unknown event id");
+        ESP_LOGI("NASA2MQTT", "Unknown event id: %d", event->event_id);
         break;
     }
     return ESP_OK;
