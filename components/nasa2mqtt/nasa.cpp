@@ -555,6 +555,8 @@ namespace esphome
                         {
 						    mqtt_publish("samsung_ehs/" + long_to_hex((uint16_t)message.messageNumber) + "/state", std::to_string(message.value));
 						    break;
+						} else {
+                            ESP_LOGW(TAG, "Message processed, but MQTT client is not connected. Dropping payload.");
                         }
 					}	
 					default:	
@@ -568,3 +570,4 @@ namespace esphome
 
     } // namespace nasa2mqtt
 } // namespace esphome
+
