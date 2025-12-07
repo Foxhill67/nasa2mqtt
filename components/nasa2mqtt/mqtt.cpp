@@ -94,7 +94,7 @@ static constexpr unsigned long BASE_DELAY_MS = 2000;   // 2 s
 static constexpr unsigned long MAX_DELAY_MS  = 30000;  // 30 s (not used yet, but handy)
 
 static bool should_retry() {
-    unsigned long now = millis();
+    unsigned long now = esphome::millis();
     if (now - last_attempt_ms >= BASE_DELAY_MS) {
         last_attempt_ms = now;
         return true;
