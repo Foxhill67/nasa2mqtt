@@ -29,9 +29,9 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGE("NASA2MQTT", "MQTT_EVENT_ERROR, error_code=%d", event->error_handle->error_type);
-
         break;
     default:
+        ESP_LOGI("NASA2MQTT", "Unknown event id");
         break;
     }
     return ESP_OK;
@@ -77,11 +77,11 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
             if (!mqtt_client->connected())
                 mqtt_client->connect();
 #elif USE_ESP32
-            ESP_LOGI("NASA2MQTT", "mqtt_connect");
+            
             if (mqtt_client == nullptr)
             {
                 esp_mqtt_client_config_t mqtt_cfg = {};
-
+                ESP_LOGI("NASA2MQTT", "mqtt_connect");
                 // --- CORRECTED ACCESS FOR MODERN ESP-IDF (v5.0+) ---
 
                 // 1. Broker Host and Port: Set directly under the 'broker' structure.
