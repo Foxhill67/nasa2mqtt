@@ -12,14 +12,14 @@ namespace esphome
 
     void NASA2MQTT::setup()
     {
-      ESP_LOGW(TAG, "setup: Starting MQTT client.");
+      ESP_LOGI(TAG, "setup: Starting MQTT client.");
       // Only start the client once at boot
       //mqtt_connect(mqtt_host, mqtt_port, mqtt_username, mqtt_password);
     }
 
     void NASA2MQTT::update()
     {
-      ESP_LOGV(TAG, "update: MQTT Connected: %s", (mqtt_connected() ? "YES" : "NO")); // Check status
+      ESP_LOGD(TAG, "update: MQTT Connected: %s", (mqtt_connected() ? "YES" : "NO")); // Check status
 
       mqtt_connect(mqtt_host, mqtt_port, mqtt_username, mqtt_password);
 
