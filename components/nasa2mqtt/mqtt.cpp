@@ -31,7 +31,8 @@ namespace esphome
 #endif
         }
 
-        void mqtt_connect(const std::string &host, const uint16_t port, const std::string &username, const std::string &password)
+
+void mqtt_connect(const std::string &host, const uint16_t port, const std::string &username, const std::string &password)
         {
 #ifdef USE_ESP8266
             if (mqtt_client == nullptr)
@@ -48,18 +49,21 @@ namespace esphome
             if (mqtt_client == nullptr)
             {
                 esp_mqtt_client_config_t mqtt_cfg = {};
-                mqtt_cfg.host = host.c_str();
-                mqtt_cfg.port = port;
+                // The configuration fields (host, port, username, password)
+                // are now nested under a 'cfg' member in the esp-idf library.
+                mqtt_cfg.broker.host = host.c_str(); // Use mqtt_cfg.broker.host
+                mqtt_cfg.broker.port = port;         // Use mqtt_cfg.broker.port
                 if (username.length() > 0)
                 {
-                    mqtt_cfg.username = username.c_str();
-                    mqtt_cfg.password = password.c_str();
+                    mqtt_cfg.credentials.username = username.c_str(); // Use mqtt_cfg.credentials.username
+                    mqtt_cfg.credentials.password = password.c_str(); // Use mqtt_cfg.credentials.password
                 }
                 mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
                 esp_mqtt_client_start(mqtt_client);
             }
 #endif
         }
+
 
         bool mqtt_publish(const std::string &topic, const std::string &payload)
         {
