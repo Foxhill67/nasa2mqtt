@@ -31,7 +31,6 @@ namespace esphome
 #endif
         }
 
-
 void mqtt_connect(const std::string &host, const uint16_t port, const std::string &username, const std::string &password)
         {
 #ifdef USE_ESP8266
@@ -49,18 +48,20 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
             if (mqtt_client == nullptr)
             {
                 esp_mqtt_client_config_t mqtt_cfg = {};
-                // **CORRECTED ACCESS FOR MODERN ESP-IDF:**
-                // The 'host' and 'port' are now set via the 'uri' member.
-                // The format is "mqtt://<host>:<port>"
-                std::string uri = "mqtt://" + host + ":" + std::to_string(port);
-                mqtt_cfg.uri = uri.c_str(); 
+
+                // --- CORRECTED ACCESS FOR MODERN ESP-IDF (v5.0+) ---
+
+                // 1. Broker Host and Port: Set directly under the 'broker' structure.
+                mqtt_cfg.broker.address.hostname = host.c_str(); 
+                mqtt_cfg.broker.address.port = port;         
 
                 if (username.length() > 0)
                 {
-                    // The 'username' and 'password' are typically directly under 'credentials'
-                    // in this configuration scheme.
+                    // 2. Username: Set directly under 'credentials'.
                     mqtt_cfg.credentials.username = username.c_str(); 
-                    mqtt_cfg.credentials.password = password.c_str(); 
+
+                    // 3. Password: Nested under 'credentials.authentication'.
+                    mqtt_cfg.credentials.authentication.password = password.c_str(); 
                 }
                 
                 mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
@@ -68,7 +69,6 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
             }
 #endif
         }
-
 
         bool mqtt_publish(const std::string &topic, const std::string &payload)
         {
