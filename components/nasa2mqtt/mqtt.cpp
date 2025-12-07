@@ -2,14 +2,15 @@
  *  mqtt.cpp – Unified MQTT wrapper for ESP8266 (AsyncMqttClient)
  *                         and ESP32   (ESP‑IDF native client)
  *
- *  Updated for ESP‑IDF v5+ (broker.address.uri replaces host/port)
- *  Includes safe cleanup, back‑off reconnect and logging.
+ *  • Works with ESP‑IDF v5+ (uses broker.address.uri)
+ *  • Safe RAII cleanup, back‑off reconnect, and ESPHome logging
  *
  *  Author: <your‑name>
  *  Date:   07 Dec 2025
  ********************************************************************/
 
 #include "esphome/core/log.h"
+#include "esphome/core/helpers.h"   // provides millis()
 #include "mqtt.h"
 
 static const char *TAG = "nasa2mqtt.mqtt";
@@ -33,7 +34,7 @@ namespace esphome {
 namespace nasa2mqtt {
 
 /* ------------------------------------------------------------------
- * Helper class – owns the raw client pointer and guarantees cleanup.
+ * RAII helper – owns the raw client pointer and guarantees cleanup.
  * ------------------------------------------------------------------ */
 class MqttClientOwner {
 public:
@@ -90,7 +91,7 @@ static MqttClientOwner client_owner;
  * ------------------------------------------------------------------ */
 static unsigned long last_attempt_ms = 0;
 static constexpr unsigned long BASE_DELAY_MS = 2000;   // 2 s
-static constexpr unsigned long MAX_DELAY_MS  = 30000;  // 30 s
+static constexpr unsigned long MAX_DELAY_MS  = 30000;  // 30 s (not used yet, but handy)
 
 static bool should_retry() {
     unsigned long now = millis();
@@ -110,7 +111,8 @@ bool mqtt_connected() {
     return mqtt_client->connected();
 #elif defined(USE_ESP32)
     if (!mqtt_client) return false;
-    return esp_mqtt_client_get_state(mqtt_client) == MQTT_STATE_CONNECTED;
+    // ESP‑IDF provides a convenience boolean helper
+    return esp_mqtt_client_is_connected(mqtt_client);
 #else
     return false;
 #endif
@@ -164,7 +166,7 @@ void mqtt_connect(const std::string &host,
             cfg.credentials.authentication.password = password.c_str();
         }
 
-        // You can tweak additional fields here (keepalive, TLS, callbacks…)
+        // You can tweak other fields (keepalive, TLS, callbacks…) here if needed.
         esp_mqtt_client_handle_t client = esp_mqtt_client_init(&cfg);
         if (!client) {
             ESP_LOGE(TAG, "Failed to initialise MQTT client");
@@ -178,14 +180,13 @@ void mqtt_connect(const std::string &host,
         ESP_LOGI(TAG, "Started MQTT client with URI %s", uri.c_str());
     }
 
-    // Check current state
-    esp_mqtt_client_state_t state = esp_mqtt_client_get_state(mqtt_client);
-    if (state == MQTT_STATE_CONNECTED) {
+    // If already connected, nothing to do
+    if (esp_mqtt_client_is_connected(mqtt_client)) {
         ESP_LOGD(TAG, "Already connected to MQTT broker");
         return;
     }
 
-    // Attempt a reconnect if enough time has elapsed
+    // Attempt a reconnect if the back‑off permits it
     if (should_retry()) {
         ESP_LOGI(TAG, "Reconnecting to MQTT broker");
         esp_mqtt_client_stop(mqtt_client);
