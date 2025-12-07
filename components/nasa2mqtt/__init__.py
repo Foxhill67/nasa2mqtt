@@ -44,7 +44,7 @@ CONFIG_SCHEMA = (
 
 async def to_code(config):
     # For MQTT
-    if CORE.is_esp8266 or CORE.is_libretiny or CORE.is_esp32:
+    if CORE.is_esp8266 or CORE.is_libretiny:
         cg.add_library("heman/AsyncMqttClient-esphome", "2.0.0")
 
     var = cg.new_Pvariable(config[CONF_ID])
@@ -61,3 +61,4 @@ async def to_code(config):
 
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+
