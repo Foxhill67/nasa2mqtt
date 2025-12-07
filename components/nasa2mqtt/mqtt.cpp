@@ -49,15 +49,20 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
             if (mqtt_client == nullptr)
             {
                 esp_mqtt_client_config_t mqtt_cfg = {};
-                // The configuration fields (host, port, username, password)
-                // are now nested under a 'cfg' member in the esp-idf library.
-                mqtt_cfg.broker.host = host.c_str(); // Use mqtt_cfg.broker.host
-                mqtt_cfg.broker.port = port;         // Use mqtt_cfg.broker.port
+                // **CORRECTED ACCESS FOR MODERN ESP-IDF:**
+                // The 'host' and 'port' are now set via the 'uri' member.
+                // The format is "mqtt://<host>:<port>"
+                std::string uri = "mqtt://" + host + ":" + std::to_string(port);
+                mqtt_cfg.uri = uri.c_str(); 
+
                 if (username.length() > 0)
                 {
-                    mqtt_cfg.credentials.username = username.c_str(); // Use mqtt_cfg.credentials.username
-                    mqtt_cfg.credentials.password = password.c_str(); // Use mqtt_cfg.credentials.password
+                    // The 'username' and 'password' are typically directly under 'credentials'
+                    // in this configuration scheme.
+                    mqtt_cfg.credentials.username = username.c_str(); 
+                    mqtt_cfg.credentials.password = password.c_str(); 
                 }
+                
                 mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
                 esp_mqtt_client_start(mqtt_client);
             }
