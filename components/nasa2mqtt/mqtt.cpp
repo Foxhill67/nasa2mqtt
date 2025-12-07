@@ -85,7 +85,8 @@ void mqtt_connect(const std::string &host, const uint16_t port, const std::strin
 
                 // 1. Broker Host and Port: Set directly under the 'broker' structure.
                 mqtt_cfg.broker.address.hostname = host.c_str(); 
-                mqtt_cfg.broker.address.port = port;         
+                mqtt_cfg.broker.address.port = port;      
+                mqtt_cfg.broker.address.transport = MQTT_TRANSPORT_OVER_TCP;
 
                 if (username.length() > 0)
                 {
