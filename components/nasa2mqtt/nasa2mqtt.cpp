@@ -21,7 +21,7 @@ namespace esphome
     {
       ESP_LOGD(TAG, "update: MQTT Connected: %s", (mqtt_connected() ? "YES" : "NO")); // Check status
 
-      //mqtt_connect(mqtt_host, mqtt_port, mqtt_username, mqtt_password);
+      mqtt_connect(mqtt_host, mqtt_port, mqtt_username, mqtt_password);
 
       // Waiting for first update before beginning processing data
       if (data_processing_init)
