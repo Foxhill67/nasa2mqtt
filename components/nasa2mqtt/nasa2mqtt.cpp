@@ -13,8 +13,8 @@ namespace esphome
     void NASA2MQTT::setup()
     {
       ESP_LOGI(TAG, "setup: Starting MQTT client.");
-      // Only start the client once at boot
-      mqtt_connect(mqtt_host, mqtt_port, mqtt_username, mqtt_password);
+      // Only start the client once at boot --> doesn't work, crashes ESP32!
+      //mqtt_connect(mqtt_host, mqtt_port, mqtt_username, mqtt_password);
     }
 
     void NASA2MQTT::update()
